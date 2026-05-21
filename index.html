@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igniting Minds — Learning Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0D2240;--teal:#1D9E75;--teal-l:#E1F5EE;--teal-d:#085041;--g0:#F8F8F6;--g1:#EFEFEC;--g3:#AAAAAA;--g5:#666;--g9:#111;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--g0);color:var(--g9);min-height:100vh;}
+header{background:var(--navy);padding:16px 24px;display:flex;align-items:center;gap:14px;}
+.logo-img{height:44px;width:auto;}
+.brand{display:flex;flex-direction:column;}
+.brand h1{font-family:'DM Serif Display',serif;font-size:20px;color:white;font-weight:400;}
+.brand p{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px;}
+.hero{background:var(--navy);padding:40px 24px 60px;text-align:center;}
+.hero h2{font-family:'DM Serif Display',serif;font-size:28px;color:white;font-weight:400;margin-bottom:10px;}
+.hero p{font-size:14px;color:rgba(255,255,255,0.6);line-height:1.7;max-width:480px;margin:0 auto;}
+.pillars-wrap{max-width:800px;margin:-30px auto 0;padding:0 20px 60px;}
+.pillars-label{font-size:11px;font-weight:600;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;text-align:center;}
+.pillars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.pillar-card{background:white;border:1px solid var(--g1);border-radius:16px;padding:20px 18px;cursor:pointer;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;text-decoration:none;display:block;}
+.pillar-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.08);}
+.pillar-card.locked{cursor:not-allowed;opacity:.55;}
+.pillar-card.locked:hover{transform:none;box-shadow:none;}
+.pillar-icon{font-size:28px;margin-bottom:10px;}
+.pillar-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.pillar-sub{font-size:12px;color:var(--g3);line-height:1.4;}
+.coming-badge{position:absolute;top:12px;right:12px;background:var(--g1);color:var(--g3);border-radius:20px;padding:2px 9px;font-size:10px;font-weight:600;}
+.accent-bar{height:4px;border-radius:0 0 0 0;margin:-20px -18px 16px;border-radius:16px 16px 0 0;}
+footer{text-align:center;padding:24px;font-size:11px;color:var(--g3);border-top:1px solid var(--g1);}
+</style>
+</head>
+<body>
+<header>
+  <img src="assets/logo.jpeg" alt="Igniting Minds" class="logo-img">
+</header>
+<div class="hero">
+  <h2>Nurturing growth,<br><em>one lesson at a time.</em></h2>
+  <p>Select a pillar below to begin your 15-minute experiential learning journey. Content adapts to your grade and SEL score.</p>
+</div>
+<div class="pillars-wrap">
+  <p class="pillars-label">Choose a pillar to explore</p>
+  <div class="pillars-grid" id="pillarsGrid"></div>
+</div>
+<footer>Igniting Minds is a product of MHITR · Vasudhaiva Kutumbakam Software Solutions Pvt. Ltd. · Private &amp; Confidential</footer>
+<script src="config.js"></script>
+<script>
+var grid = document.getElementById('pillarsGrid');
+IM_CONFIG.PILLARS.forEach(function(p) {
+  var a = document.createElement('a');
+  a.className = 'pillar-card' + (p.available ? '' : ' locked');
+  a.href = p.available ? 'learn.html?pillar='+p.key : '#';
+  a.innerHTML =
+    '<div class="accent-bar" style="background:'+p.color+';"></div>'+
+    '<div class="pillar-icon">'+p.icon+'</div>'+
+    '<div class="pillar-name" style="color:'+p.textColor+';">'+p.label+'</div>'+
+    '<div class="pillar-sub">'+p.snippets+' snippets · 15 min each</div>'+
+    (!p.available ? '<span class="coming-badge">Coming soon</span>' : '');
+  grid.appendChild(a);
+});
+</script>
+</body>
+</html>

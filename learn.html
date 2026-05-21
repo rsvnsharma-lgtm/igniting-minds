@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igniting Minds — Learn</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0D2240;--teal:#1D9E75;--teal-l:#E1F5EE;--teal-d:#085041;--amber:#EF9F27;--amber-l:#FAEEDA;--amber-d:#633806;--coral:#D85A30;--coral-l:#FAECE7;--coral-d:#712B13;--purple:#534AB7;--purple-l:#EEEDFE;--purple-d:#3C3489;--blue-l:#E6F1FB;--blue-d:#0C447C;--g0:#F8F8F6;--g1:#EFEFEC;--g2:#DDDDD8;--g3:#AAAAAA;--g5:#666;--g9:#111;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--g0);color:var(--g9);min-height:100vh;}
+/* Header */
+header{background:var(--navy);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;}
+.logo-img{height:38px;width:auto;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.snip-badge{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:20px;padding:4px 11px;font-size:11px;}
+.home-link{color:rgba(255,255,255,0.5);font-size:12px;text-decoration:none;}
+.home-link:hover{color:white;}
+/* Wrap */
+.wrap{max-width:640px;margin:0 auto;padding:24px 16px 80px;}
+/* Screens */
+.screen{display:none;}
+.screen.active{display:block;animation:fadeUp .22s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+/* Typography */
+.sec-label{font-size:11px;font-weight:600;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 10px;}
+.page-title{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:var(--g9);margin-bottom:6px;}
+.page-sub{font-size:13px;color:var(--g5);line-height:1.65;margin-bottom:22px;}
+/* Cards */
+.card{background:white;border:1px solid var(--g1);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+/* Language */
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.lang-card{background:white;border:2px solid var(--g1);border-radius:12px;padding:14px 10px;cursor:pointer;text-align:center;transition:all .2s;}
+.lang-card:hover{border-color:var(--teal);transform:translateY(-2px);}
+.lang-card.selected{border-color:var(--teal);background:var(--teal-l);}
+.lang-native{font-size:18px;font-weight:700;margin-bottom:3px;}
+.lang-english{font-size:11px;color:var(--g3);}
+.lang-card.selected .lang-english{color:var(--teal-d);}
+/* Grade */
+.grade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.grade-card{background:white;border-radius:14px;padding:18px 16px;cursor:pointer;transition:transform .15s,box-shadow .15s;border:2px solid transparent;}
+.grade-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
+.grade-card.g6{border-color:var(--purple);}  .grade-card.g8{border-color:#2E86AB;}
+.grade-card.g10{border-color:var(--amber);}  .grade-card.col{border-color:var(--teal);}
+.grade-icon{font-size:26px;margin-bottom:10px;}
+.grade-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.grade-sub{font-size:12px;color:var(--g3);line-height:1.4;}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.diff-box{border-radius:10px;padding:10px 12px;}
+/* Band */
+.band-card{background:white;border:1px solid var(--g1);border-radius:14px;padding:15px 18px;cursor:pointer;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;transition:transform .15s,box-shadow .15s;}
+.band-card:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.06);}
+.band-card.developing{border-left:4px solid var(--coral);}
+.band-card.emerging{border-left:4px solid var(--amber);}
+.band-card.proficient{border-left:4px solid var(--teal);}
+/* Pills & Badges */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;}
+.pill.g6{background:var(--purple-l);color:var(--purple-d);}
+.pill.g8{background:#E6F1FB;color:#0C447C;}
+.pill.g10{background:var(--amber-l);color:var(--amber-d);}
+.pill.col{background:var(--teal-l);color:var(--teal-d);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge.developing{background:var(--coral-l);color:var(--coral-d);}
+.badge.emerging{background:var(--amber-l);color:var(--amber-d);}
+.badge.proficient{background:var(--teal-l);color:var(--teal-d);}
+/* Progress */
+.prog-wrap{height:5px;background:var(--g1);border-radius:5px;margin-bottom:16px;}
+.prog-fill{height:5px;border-radius:5px;background:var(--teal);transition:width .4s ease;}
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:16px;}
+.tab-btn{flex:1;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid var(--g1);background:white;color:var(--g3);font-family:'DM Sans',sans-serif;}
+.tab-btn.on{border:2px solid var(--teal);background:var(--teal-l);color:var(--teal-d);font-weight:700;}
+.tab-content{background:white;border:1px solid var(--g1);border-radius:14px;padding:16px 18px;margin-bottom:14px;}
+/* Learn */
+.card-h{font-size:14px;font-weight:600;margin-bottom:5px;}
+.card-b{font-size:13px;color:var(--g5);line-height:1.7;}
+.colorbox{border-radius:10px;padding:11px 14px;margin-bottom:8px;}
+.colorbox .ch{font-size:13px;font-weight:600;margin-bottom:3px;}
+.colorbox .cb{font-size:13px;line-height:1.55;opacity:.88;}
+.ladder-arrow{text-align:center;font-size:16px;color:var(--g2);margin:3px 0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.tip-box{border-radius:10px;padding:10px 14px;margin-top:6px;}
+/* Roleplay */
+.scene-box{background:var(--g0);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--g5);line-height:1.6;}
+.scene-box strong{color:var(--g9);}
+.dialogue{border-left:3px solid var(--teal);padding-left:12px;margin-bottom:10px;}
+.d-who{font-size:11px;font-weight:700;color:var(--teal-d);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em;}
+.d-text{font-size:13px;color:var(--g5);line-height:1.55;}
+.challenge-box{background:var(--blue-l);border-radius:10px;padding:10px 14px;margin:10px 0 8px;font-size:13px;color:var(--blue-d);line-height:1.6;}
+.debrief-box{background:var(--amber-l);border-radius:10px;padding:9px 13px;font-size:13px;color:var(--amber-d);line-height:1.5;}
+.rp-label{font-size:12px;font-weight:600;color:var(--g9);margin:14px 0 6px;}
+textarea{width:100%;border:1.5px solid var(--g1);border-radius:10px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--g9);resize:vertical;background:var(--g0);transition:border-color .2s;line-height:1.6;}
+textarea:focus{outline:none;border-color:var(--teal);background:white;}
+textarea::placeholder{color:var(--g3);}
+/* Reflect */
+.reflect-q-wrap{margin-bottom:14px;}
+.reflect-q-label{font-size:13px;font-weight:500;color:var(--g9);margin-bottom:6px;line-height:1.5;}
+/* Confidence */
+.conf-section{background:var(--g0);border-radius:12px;padding:14px 16px;margin:16px 0;}
+.conf-label{font-size:13px;font-weight:600;color:var(--g9);margin-bottom:12px;text-align:center;}
+.conf-emojis{display:flex;gap:8px;justify-content:center;}
+.conf-btn{background:white;border:2px solid var(--g1);border-radius:12px;padding:10px 8px;font-size:22px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;font-family:'DM Sans',sans-serif;}
+.conf-btn span{font-size:11px;color:var(--g3);font-weight:500;}
+.conf-btn.selected{border-color:var(--teal);background:var(--teal-l);}
+.conf-btn.selected span{color:var(--teal-d);}
+.conf-btn:hover{transform:scale(1.05);}
+/* Journey */
+.journey-btn{width:100%;background:var(--navy);color:white;border:none;border-radius:12px;padding:14px 0;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+.journey-btn:hover{opacity:.88;}
+.journey-btn:disabled{background:var(--g2);cursor:not-allowed;opacity:1;}
+.journey-hint{font-size:11px;color:var(--g3);text-align:center;margin-top:6px;}
+/* Nav */
+.nav-row{display:flex;gap:8px;margin-top:4px;}
+.btn-prev,.btn-next{flex:1;padding:10px 0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-prev{background:white;border:1px solid var(--g1);color:var(--g5);}
+.btn-prev:disabled{opacity:.35;cursor:not-allowed;}
+.btn-next{background:var(--teal);color:white;border:none;}
+.btn-next:disabled{background:var(--g2);cursor:not-allowed;}
+.btn-back{background:white;border:1px solid var(--g1);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;color:var(--g5);font-family:'DM Sans',sans-serif;}
+.btn-back:hover{background:var(--g0);}
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(13,34,64,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:16px;}
+.loading-overlay.hidden{display:none;}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{color:white;font-size:15px;font-weight:500;}
+.loading-sub{color:rgba(255,255,255,.5);font-size:13px;}
+/* Chat */
+.chat-wrap{display:none;flex-direction:column;height:calc(100vh - 62px);}
+.chat-wrap.active{display:flex;}
+.chat-hdr{padding:14px 16px;border-bottom:1px solid var(--g1);background:white;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.chat-hdr-info .ct{font-size:14px;font-weight:600;}
+.chat-hdr-info .cs{font-size:11px;color:var(--g3);}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--g0);}
+.msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.65;}
+.msg.assistant{background:white;border:1px solid var(--g1);border-radius:4px 14px 14px 14px;color:var(--g9);align-self:flex-start;}
+.msg.user{background:var(--navy);color:white;border-radius:14px 4px 14px 14px;align-self:flex-end;}
+.msg.typing{color:var(--g3);font-style:italic;align-self:flex-start;}
+.chat-inp-wrap{padding:12px 16px;background:white;border-top:1px solid var(--g1);display:flex;gap:8px;flex-shrink:0;}
+.chat-inp{flex:1;border:1.5px solid var(--g1);border-radius:10px;padding:10px 13px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--g9);background:var(--g0);resize:none;min-height:42px;max-height:120px;transition:border-color .2s;}
+.chat-inp:focus{outline:none;border-color:var(--teal);background:white;}
+.chat-send{background:var(--teal);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.chat-send:disabled{background:var(--g2);cursor:not-allowed;}
+/* Safety toast */
+.safety-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:10px 18px;border-radius:10px;font-size:13px;z-index:500;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center;}
+.safety-toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay hidden" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Getting ready...</div>
+  <div class="loading-sub" id="loadingSub">Just a moment</div>
+</div>
+
+<div class="safety-toast" id="safetyToast"></div>
+
+<header>
+  <a href="index.html"><img src="assets/logo.jpeg" alt="Igniting Minds" class="logo-img"></a>
+  <div class="hdr-right">
+    <span class="snip-badge" id="snippetBadge">Snippet 2 of 5</span>
+    <a href="index.html" class="home-link">← All pillars</a>
+  </div>
+</header>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+<div class="wrap">
+
+  <!-- LANGUAGE SCREEN -->
+  <div class="screen active" id="screen-lang">
+    <p class="page-title" style="margin-top:8px;">Welcome / स्वागत है</p>
+    <p class="page-sub">Choose your language to begin · भाषा चुनें</p>
+    <div class="lang-grid" id="langGrid"></div>
+    <button class="journey-btn" id="langBtn" disabled onclick="goToGrade()" style="margin-top:4px;">Continue →</button>
+  </div>
+
+  <!-- GRADE SCREEN -->
+  <div class="screen" id="screen-grade">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <button class="btn-back" onclick="showScreen('screen-lang')">← Back</button>
+      <span id="langPill" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;background:var(--blue-l);color:var(--blue-d);"></span>
+    </div>
+    <p class="page-title" id="gradeTitleText">Select your grade group</p>
+    <p class="page-sub" id="gradeSubText">This shapes the content, stories and language used throughout.</p>
+    <div class="grade-grid" id="gradeGrid"></div>
+    <p class="sec-label" id="diffLabel">How content differs</p>
+    <div class="diff-grid">
+      <div class="diff-box" style="background:var(--purple-l);">
+        <p style="font-size:12px;font-weight:700;color:var(--purple-d);margin-bottom:4px;">🏫 Grade 6–7</p>
+        <p style="font-size:12px;color:var(--purple);line-height:1.5;" id="diff6Body">Concrete goals · School stories · Short timeframes · Simple language</p>
+      </div>
+      <div class="diff-box" style="background:var(--teal-l);">
+        <p style="font-size:12px;font-weight:700;color:var(--teal-d);margin-bottom:4px;">🎓 College</p>
+        <p style="font-size:12px;color:var(--teal);line-height:1.5;" id="diffColBody">Identity & career · Complex trade-offs · Long-term stakes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAND SCREEN -->
+  <div class="screen" id="screen-band">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <button class="btn-back" onclick="showScreen('screen-grade')">← Back</button>
+      <span id="gradePillBand" class="pill g6"></span>
+    </div>
+    <p class="page-title" id="bandTitleText">What is your SEL score band?</p>
+    <p class="page-sub" id="bandSubText">Pick the band that matches your assessment result.</p>
+    <div id="bandCards"></div>
+  </div>
+
+  <!-- LESSON SCREEN -->
+  <div class="screen" id="screen-lesson">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn-back" onclick="showScreen('screen-band')">← Back</button>
+      <span id="gradePillLesson" class="pill g6"></span>
+      <span id="bandBadgeLesson" class="badge developing"></span>
+    </div>
+    <p class="page-title" id="lessonTitle"></p>
+    <p style="font-size:12px;color:var(--g3);margin-bottom:14px;" id="lessonSub"></p>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:33%;"></div></div>
+    <div class="tabs" id="tabsRow"></div>
+    <div class="tab-content" id="tabContent"></div>
+    <div class="nav-row">
+      <button class="btn-prev" id="btnPrev" onclick="prevTab()">← Previous</button>
+      <button class="btn-next" id="btnNext" onclick="nextTab()">Next →</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div class="chat-wrap" id="screen-chat">
+  <div class="chat-hdr">
+    <button class="btn-back" onclick="exitChat()">← Back</button>
+    <div class="chat-hdr-info">
+      <div class="ct" id="chatTitle">Your Learning Coach</div>
+      <div class="cs" id="chatSub">Igniting Minds · Powered by AI</div>
+    </div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-inp-wrap">
+    <textarea class="chat-inp" id="chatInp" placeholder="Type your message..." rows="1" onkeydown="handleKey(event)"></textarea>
+    <button class="chat-send" id="chatSendBtn" onclick="sendMsg()">Send</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="engine.js"></script>
+<script src="content/time-management/snippet-2.js"></script>
+<script>
+// ── App state ──────────────────────────────────────────────────────────────
+var currentSnippetData = null;
+var gradeColors = { g6:'#534AB7', g8:'#2E86AB', g10:'#EF9F27', col:'#1D9E75' };
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  var grid = document.getElementById('langGrid');
+  IM_CONFIG.LANGUAGES.forEach(function(l) {
+    var d = document.createElement('div');
+    d.className = 'lang-card';
+    d.setAttribute('data-lang', l.key);
+    d.innerHTML = '<div class="lang-native">'+l.native+'</div><div class="lang-english">'+l.english+'</div>';
+    d.onclick = function() { selectLang(l.key); };
+    grid.appendChild(d);
+  });
+  var gg = document.getElementById('gradeGrid');
+  IM_CONFIG.GRADES.forEach(function(g) {
+    var d = document.createElement('div');
+    d.className = 'grade-card '+g.key;
+    d.innerHTML = '<div class="grade-icon">'+g.icon+'</div><div class="grade-name" style="color:'+gradeColors[g.key]+';">'+g.label+'</div><div class="grade-sub">'+g.sub+'</div>';
+    d.onclick = function() { pickGrade(g.key); };
+    gg.appendChild(d);
+  });
+})();
+
+function selectLang(key) {
+  IMEngine.setLang(key);
+  document.querySelectorAll('.lang-card').forEach(function(c) { c.classList.toggle('selected', c.getAttribute('data-lang')===key); });
+  document.getElementById('langBtn').disabled = false;
+}
+
+async function goToGrade() {
+  showLoading('Preparing your experience...','Just a moment');
+  try {
+    await IMEngine.prepareUI();
+    applyUILabels();
+    hideLoading();
+    showScreen('screen-grade');
+  } catch(e) {
+    hideLoading();
+    showScreen('screen-grade');
+  }
+}
+
+function applyUILabels() {
+  var L = IMEngine.getState().uiLabelCache[IMEngine.getState().lang] || {};
+  var map = {
+    gradeTitleText:'gradeTitleText', gradeSubText:'gradeSubText',
+    bandTitleText:'bandTitleText', bandSubText:'bandSubText',
+    diff6Body:'diff6Body', diffColBody:'diffColBody', diffLabel:'diffLabel'
+  };
+  Object.keys(map).forEach(function(k) { if (L[k] && document.getElementById(k)) document.getElementById(k).textContent = L[k]; });
+  var s = IMEngine.getState();
+  var langInfo = IM_CONFIG.LANGUAGES.find(function(l){ return l.key===s.lang; });
+  document.getElementById('langPill').textContent = langInfo ? langInfo.native : s.lang.toUpperCase();
+}
+
+function pickGrade(g) {
+  IMEngine.setGrade(g);
+  var info = IM_CONFIG.GRADES.find(function(x){ return x.key===g; });
+  var L = IMEngine.getState().uiLabelCache[IMEngine.getState().lang] || {};
+  document.getElementById('gradePillBand').className = 'pill '+g;
+  document.getElementById('gradePillBand').textContent = info.icon+' '+info.label;
+  renderBandCards();
+  showScreen('screen-band');
+}
+
+function renderBandCards() {
+  var s = IMEngine.getState();
+  var L = s.uiLabelCache[s.lang] || {};
+  var html = '';
+  IM_CONFIG.BANDS.forEach(function(b) {
+    var label = L['band'+cap(b.key)] || b.label;
+    var desc  = L['band'+cap(b.key)+'Desc'] || defaultBandDesc(b.key);
+    html += '<div class="band-card '+b.key+'" onclick="pickBand(\''+b.key+'\')">'
+      +'<div><span class="badge '+b.key+'" style="margin-bottom:6px;display:inline-block;">'+label+'</span>'
+      +'<p style="font-size:13px;color:var(--g5);">'+desc+'</p></div>'
+      +'<span style="font-size:20px;color:var(--g2);">›</span></div>';
+  });
+  document.getElementById('bandCards').innerHTML = html;
+}
+
+function defaultBandDesc(k) {
+  return { developing:"I'm just starting to understand goal types.", emerging:"I set goals but mix up short and long-term thinking.", proficient:"I set goals regularly and want to think more strategically." }[k]||'';
+}
+
+async function pickBand(b) {
+  IMEngine.setBand(b);
+  IMEngine.setPillar('time-management');
+  IMEngine.setSnippet(2);
+  IMEngine.resetLesson();
+  var s = IMEngine.getState();
+  var L = s.uiLabelCache[s.lang] || {};
+  var langInfo = IM_CONFIG.LANGUAGES.find(function(l){return l.key===s.lang;});
+  showLoading(
+    s.lang==='en' ? 'Loading your lesson...' : 'Preparing lesson in '+langInfo.native+'...',
+    s.lang==='en' ? 'Just a moment' : 'Translating content for you'
+  );
+  try {
+    var rawData = SNIPPET_2.content[s.grade][b];
+    currentSnippetData = await IMEngine.prepareLesson(rawData);
+    hideLoading();
+    renderLesson();
+    showScreen('screen-lesson');
+  } catch(e) {
+    hideLoading();
+    currentSnippetData = SNIPPET_2.content[s.grade][b];
+    IMEngine.getState().translatedContent = currentSnippetData;
+    renderLesson();
+    showScreen('screen-lesson');
+  }
+}
+
+function renderLesson() {
+  var s = IMEngine.getState();
+  var L = s.uiLabelCache[s.lang] || {};
+  var d = currentSnippetData;
+  var info = IM_CONFIG.GRADES.find(function(g){ return g.key===s.grade; });
+  var binfo = IM_CONFIG.BANDS.find(function(b){ return b.key===s.band; });
+  document.getElementById('gradePillLesson').className = 'pill '+s.grade;
+  document.getElementById('gradePillLesson').textContent = info.icon+' '+info.label;
+  document.getElementById('bandBadgeLesson').className = 'badge '+s.band;
+  document.getElementById('bandBadgeLesson').textContent = L['band'+cap(s.band)] || binfo.label;
+  document.getElementById('lessonTitle').textContent = d.title;
+  document.getElementById('lessonSub').textContent   = d.subtitle;
+  document.getElementById('snippetBadge').textContent = 'Snippet '+SNIPPET_2.index+' of '+SNIPPET_2.totalSnippets;
+  renderTabs();
+  renderTabContent();
+}
+
+function renderTabs() {
+  var s = IMEngine.getState();
+  var L = s.uiLabelCache[s.lang] || {};
+  var tabs = [
+    { key:'learn',    icon:'📖', label:L.tabLearn||'Learn',      time:L.time5||'5 min' },
+    { key:'roleplay', icon:'🎭', label:L.tabRoleplay||'Role play', time:L.time7||'7 min' },
+    { key:'reflect',  icon:'🧠', label:L.tabReflect||'Reflect',   time:L.time3||'3 min' }
+  ];
+  document.getElementById('tabsRow').innerHTML = tabs.map(function(t) {
+    return '<button class="tab-btn'+(s.tab===t.key?' on':'')+'" onclick="setTab(\''+t.key+'\')">'+t.icon+' '+t.label+' <span style="font-size:10px;opacity:.6;">'+t.time+'</span></button>';
+  }).join('');
+}
+
+function renderTabContent() {
+  var s = IMEngine.getState();
+  var d = currentSnippetData;
+  var L = s.uiLabelCache[s.lang] || {};
+  var pct = {learn:33,roleplay:66,reflect:100}[s.tab];
+  document.getElementById('progFill').style.width = pct+'%';
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('on',['learn','roleplay','reflect'][i]===s.tab); });
+  var html = '';
+
+  if (s.tab === 'learn') {
+    var lrn = d.learn;
+    html += '<div class="card"><p class="card-h">'+lrn.card.heading+'</p><p class="card-b">'+lrn.card.body+'</p></div>';
+    if (lrn.label) html += '<p class="sec-label" style="margin-top:4px;">'+lrn.label+'</p>';
+    if (lrn.boxes) lrn.boxes.forEach(function(b) {
+      html += '<div class="colorbox" style="background:'+b.bg+';"><p class="ch" style="color:'+b.color+';">'+b.icon+' '+b.heading+'</p><p class="cb" style="color:'+b.color+';">'+b.body+'</p></div>';
+    });
+    if (lrn.ladder) lrn.ladder.forEach(function(item,i) {
+      html += '<div class="colorbox" style="background:'+item.bg+';"><p class="ch" style="color:'+item.color+';">'+item.icon+' '+item.heading+'</p><p class="cb" style="color:'+item.color+';">'+item.body+'</p></div>';
+      if (i<lrn.ladder.length-1) html += '<div class="ladder-arrow">↑</div>';
+    });
+    if (lrn.grid) {
+      html += '<div class="grid2">';
+      lrn.grid.forEach(function(g) { html += '<div class="colorbox" style="background:'+g.bg+';margin-bottom:0;"><p class="ch" style="color:'+g.color+';">'+g.icon+' '+g.heading+'</p><p class="cb" style="color:'+g.color+';">'+g.body+'</p></div>'; });
+      html += '</div>';
+    }
+    if (lrn.tip) html += '<div class="tip-box" style="background:'+lrn.tip.bg+';"><p style="font-size:13px;color:'+lrn.tip.color+';line-height:1.5;">💡 '+lrn.tip.text+'</p></div>';
+
+  } else if (s.tab === 'roleplay') {
+    var rp = d.roleplay;
+    html += '<div class="scene-box"><strong>'+(L.sceneLabel||'Scene:')+' </strong>'+rp.scene+'</div>';
+    rp.lines.forEach(function(l) { html += '<div class="dialogue"><p class="d-who">'+l.who+'</p><p class="d-text">'+l.text+'</p></div>'; });
+    html += '<div class="challenge-box"><strong>'+(L.yourTurn||'Your turn:')+' </strong>'+rp.challenge+'</div>';
+    html += '<div class="debrief-box"><strong>'+(L.debrief||'Debrief:')+' </strong>'+rp.debrief+'</div>';
+    html += '<p class="rp-label">'+(L.rpInputLabel||'Your response')+'</p>';
+    html += '<textarea id="rpTextarea" placeholder="'+(rp.inputPlaceholder||'Write your response here...')+'" style="min-height:100px;" oninput="IMEngine.setRpAnswer(this.value)">'+s.rpAnswer+'</textarea>';
+
+  } else if (s.tab === 'reflect') {
+    d.reflect.forEach(function(q,i) {
+      html += '<div class="reflect-q-wrap"><p class="reflect-q-label">'+(i+1)+'. '+q+'</p>';
+      html += '<textarea placeholder="'+(L.reflectPlaceholder||'Share your thoughts...')+'" style="min-height:72px;" oninput="IMEngine.setReflect('+i+',this.value)">'+s.reflectAnswers[i]+'</textarea></div>';
+    });
+    var confLabels = [
+      { e:'😕', l:L.confNotSure||'Not sure'      },
+      { e:'😐', l:L.confABit||'A bit clearer'    },
+      { e:'🙂', l:L.confGetting||'Getting it'    },
+      { e:'😀', l:L.confGotIt||'Got it!'         }
+    ];
+    html += '<div class="conf-section"><p class="conf-label">'+(d.confidenceLabel||L.confQuestion||'How confident do you feel?')+'</p><div class="conf-emojis">';
+    confLabels.forEach(function(c,i) {
+      html += '<button class="conf-btn'+(s.confidence===i?' selected':'')+'" onclick="setConf('+i+')">'+c.e+'<span>'+c.l+'</span></button>';
+    });
+    html += '</div></div>';
+    html += '<button class="journey-btn" onclick="startJourney()">'+(L.journeyBtn||'Continue my learning journey ↗')+'</button>';
+    html += '<p class="journey-hint">'+(L.journeyHint||'Your answers will be shared with your AI coach to give you personalised guidance')+'</p>';
+  }
+
+  document.getElementById('tabContent').innerHTML = html;
+  document.getElementById('btnPrev').disabled = s.tab==='learn';
+  document.getElementById('btnNext').disabled = s.tab==='reflect';
+  document.getElementById('btnPrev').textContent = L.btnPrev||'← Previous';
+  document.getElementById('btnNext').textContent = L.btnNext||'Next →';
+}
+
+function setConf(i) { IMEngine.setConfidence(i); renderTabContent(); }
+function setTab(t)  { IMEngine.setTab(t); renderTabContent(); }
+function prevTab()  { var ts=['learn','roleplay','reflect']; var i=ts.indexOf(IMEngine.getState().tab); if(i>0){IMEngine.setTab(ts[i-1]);renderTabContent();} }
+function nextTab()  { var ts=['learn','roleplay','reflect']; var i=ts.indexOf(IMEngine.getState().tab); if(i<2){IMEngine.setTab(ts[i+1]);renderTabContent();} }
+
+async function startJourney() {
+  var s = IMEngine.getState();
+  var L = s.uiLabelCache[s.lang] || {};
+  document.getElementById('chatTitle').textContent = L.chatTitle||'Your Learning Coach';
+  document.getElementById('chatSub').textContent  = L.chatSub||'Igniting Minds · Powered by AI';
+  document.getElementById('chatInp').placeholder  = L.chatPlaceholder||'Type your message...';
+  document.getElementById('chatSendBtn').textContent = L.chatSend||'Send';
+  document.getElementById('chatMsgs').innerHTML = '';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('screen-chat').classList.add('active');
+  showTyping();
+  try {
+    var reply = await IMEngine.startCoachChat(currentSnippetData);
+    removeTyping();
+    appendMsg('assistant', reply);
+  } catch(e) {
+    removeTyping();
+    appendMsg('assistant', L.errorChat||'Something went wrong. Please try again.');
+  }
+}
+
+function exitChat() {
+  document.getElementById('screen-chat').classList.remove('active');
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+async function sendMsg() {
+  var inp = document.getElementById('chatInp');
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  appendMsg('user', text);
+  document.getElementById('chatSendBtn').disabled = true;
+  showTyping();
+  try {
+    var reply = await IMEngine.sendMessage(text, currentSnippetData);
+    removeTyping();
+    appendMsg('assistant', reply);
+  } catch(e) {
+    removeTyping();
+    var L = IMEngine.getState().uiLabelCache[IMEngine.getState().lang] || {};
+    appendMsg('assistant', L.errorChat||'Something went wrong. Please try again.');
+  }
+  document.getElementById('chatSendBtn').disabled = false;
+}
+
+function handleKey(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+
+function appendMsg(role, text) {
+  var div = document.createElement('div');
+  div.className = 'msg '+role;
+  div.textContent = text;
+  var msgs = document.getElementById('chatMsgs');
+  msgs.appendChild(div);
+  msgs.scrollTop = 999999;
+}
+function showTyping() {
+  var div = document.createElement('div');
+  div.className = 'msg typing'; div.id = 'typingDot';
+  div.textContent = '...';
+  var msgs = document.getElementById('chatMsgs');
+  msgs.appendChild(div); msgs.scrollTop = 999999;
+}
+function removeTyping() { var t=document.getElementById('typingDot'); if(t) t.remove(); }
+
+function showLoading(t,s) { document.getElementById('loadingText').textContent=t; document.getElementById('loadingSub').textContent=s; document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading()    { document.getElementById('loadingOverlay').classList.add('hidden'); }
+function showScreen(id)   { document.querySelectorAll('#mainApp .screen').forEach(function(s){s.classList.remove('active');}); document.getElementById(id).classList.add('active'); }
+function cap(s)           { return s.charAt(0).toUpperCase()+s.slice(1); }
+</script>
+</body>
+</html>
