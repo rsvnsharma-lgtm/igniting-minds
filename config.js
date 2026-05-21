@@ -5,7 +5,7 @@
 
 const IM_CONFIG = {
 
-  API_KEY : 'YOUR_ANTHROPIC_API_KEY',
+  API_KEY : 'ANTHROPIC_API_KEY',
   MODEL   : 'claude-sonnet-4-20250514',
 
   LANGUAGES: [
