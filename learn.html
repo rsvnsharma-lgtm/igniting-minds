@@ -290,13 +290,14 @@ textarea::placeholder{color:var(--g3);}
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
 // Igniting Minds — Global Configuration
-// Replace API_KEY with your Anthropic key before deploying
+// SAFE TO COMMIT TO GITHUB — no API keys here
+// Set ANTHROPIC_API_KEY in Vercel Dashboard → Project Settings → Environment Variables
 // ─────────────────────────────────────────────────────────────────────────────
 
 const IM_CONFIG = {
 
-  API_KEY : 'YOUR_ANTHROPIC_API_KEY',
-  MODEL   : 'claude-sonnet-4-20250514',
+  // API is proxied through /api/claude — key is stored securely in Vercel env vars
+  API_ENDPOINT: '/api/chat',
 
   LANGUAGES: [
     { key:'en', native:'English', english:'English' },
@@ -321,15 +322,14 @@ const IM_CONFIG = {
   ],
 
   PILLARS: [
-    { key:'time-management',           label:'Time Management',           icon:'⏰', color:'#1D9E75', bg:'#E1F5EE', textColor:'#085041', snippets:5, available:true  },
-    { key:'emotional-regulation',      label:'Emotional Regulation',      icon:'💛', color:'#EF9F27', bg:'#FAEEDA', textColor:'#633806', snippets:5, available:false },
-    { key:'relationship-management',   label:'Relationship Management',   icon:'🤝', color:'#534AB7', bg:'#EEEDFE', textColor:'#3C3489', snippets:5, available:false },
-    { key:'growth-mindset',            label:'Growth Mindset',            icon:'🌱', color:'#2E86AB', bg:'#E6F1FB', textColor:'#0C447C', snippets:5, available:false },
-    { key:'structured-problem-solving',label:'Structured Problem Solving',icon:'🧩', color:'#D85A30', bg:'#FAECE7', textColor:'#712B13', snippets:5, available:false },
-    { key:'digital-detox',             label:'Digital Detox',             icon:'📵', color:'#0D2240', bg:'#E8ECF2', textColor:'#0D2240', snippets:5, available:false }
+    { key:'time-management',            label:'Time Management',           icon:'⏰', color:'#1D9E75', bg:'#E1F5EE', textColor:'#085041', snippets:5, available:true  },
+    { key:'emotional-regulation',       label:'Emotional Regulation',      icon:'💛', color:'#EF9F27', bg:'#FAEEDA', textColor:'#633806', snippets:5, available:false },
+    { key:'relationship-management',    label:'Relationship Management',   icon:'🤝', color:'#534AB7', bg:'#EEEDFE', textColor:'#3C3489', snippets:5, available:false },
+    { key:'growth-mindset',             label:'Growth Mindset',            icon:'🌱', color:'#2E86AB', bg:'#E6F1FB', textColor:'#0C447C', snippets:5, available:false },
+    { key:'structured-problem-solving', label:'Structured Problem Solving',icon:'🧩', color:'#D85A30', bg:'#FAECE7', textColor:'#712B13', snippets:5, available:false },
+    { key:'digital-detox',              label:'Digital Detox',             icon:'📵', color:'#0D2240', bg:'#E8ECF2', textColor:'#0D2240', snippets:5, available:false }
   ],
 
-  // Injected into EVERY coach chat — cannot be overridden by student input
   COACH_GUARDRAILS: `
 ABSOLUTE SAFETY RULES — FOLLOW THESE AT ALL TIMES WITHOUT EXCEPTION:
 
@@ -347,13 +347,13 @@ ABSOLUTE SAFETY RULES — FOLLOW THESE AT ALL TIMES WITHOUT EXCEPTION:
 
 4. CONTENT SAFETY: Never produce content that is adult, violent, politically charged, sexually suggestive, or harmful in any way. Keep everything strictly age-appropriate.
 
-5. EMOTIONAL SAFETY: If a student expresses distress, sadness, anxiety, or any mental health concern, respond warmly, validate their feelings briefly, and say: "It sounds like you're going through something difficult. I'd really encourage you to speak with a trusted adult, teacher, or counsellor — they can help you much better than I can. I'm here for your learning journey whenever you're ready."
+5. EMOTIONAL SAFETY: If a student expresses distress, sadness, anxiety, or any mental health concern, respond warmly and say: "It sounds like you're going through something difficult. I'd really encourage you to speak with a trusted adult, teacher, or counsellor — they can help you much better than I can. I'm here for your learning journey whenever you're ready."
 
-6. NO EXTERNAL RESOURCES: Do not recommend websites, apps, YouTube channels, books, or anything outside the Igniting Minds program.
+6. NO EXTERNAL RESOURCES: Do not recommend websites, apps, or anything outside the Igniting Minds program.
 
 7. LANGUAGE CONSISTENCY: Always respond in the student's chosen language for this session.
 
-8. COACHING ONLY: Your job is to ask good questions, encourage reflection, and deepen understanding — never just give answers. Always invite the student to think first.
+8. COACHING ONLY: Ask good questions, encourage reflection, deepen understanding — never just give answers.
 `
 };
 
@@ -361,7 +361,7 @@ ABSOLUTE SAFETY RULES — FOLLOW THESE AT ALL TIMES WITHOUT EXCEPTION:
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
 // Igniting Minds — Core Engine
-// Handles: translation, AI coaching, API calls, state, routing
+// API calls go to /api/claude (Vercel serverless) — key never in browser
 // ─────────────────────────────────────────────────────────────────────────────
 
 const IMEngine = (() => {
@@ -382,59 +382,44 @@ const IMEngine = (() => {
     currentSubtopic: ''
   };
 
-  // ── Anthropic API call (translation / one-shot) ────────────────────────────
-  async function callClaude(userPrompt, maxTokens = 1000) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+  // ── Call our secure proxy instead of Anthropic directly ───────────────────
+  async function callProxy(messages, systemPrompt, maxTokens) {
+    const body = {
+      messages:   messages,
+      max_tokens: maxTokens || 1000
+    };
+    if (systemPrompt) body.system = systemPrompt;
+
+    const res = await fetch(IM_CONFIG.API_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': IM_CONFIG.API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: IM_CONFIG.MODEL,
-        max_tokens: maxTokens,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
+
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    if (!res.ok) throw new Error(data.error || 'API error');
     return data.content[0].text;
   }
 
-  // ── Anthropic API call (multi-turn coaching chat) ──────────────────────────
+  // ── One-shot call (translation) ────────────────────────────────────────────
+  async function callClaude(userPrompt, maxTokens) {
+    return callProxy([{ role: 'user', content: userPrompt }], null, maxTokens);
+  }
+
+  // ── Multi-turn coaching call ───────────────────────────────────────────────
   async function callClaudeChat(history, systemPrompt) {
     const messages = history.filter(m => m.role !== 'system');
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': IM_CONFIG.API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: IM_CONFIG.MODEL,
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: messages
-      })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    return data.content[0].text;
+    return callProxy(messages, systemPrompt, 1000);
   }
 
   // ── Build hardened system prompt for coach ─────────────────────────────────
   function buildCoachSystemPrompt(snippetData) {
-    const langName = IM_CONFIG.LANGUAGES.find(l => l.key === state.lang)?.english || 'English';
+    const langName  = IM_CONFIG.LANGUAGES.find(l => l.key === state.lang)?.english || 'English';
     const gradeName = IM_CONFIG.GRADES.find(g => g.key === state.grade)?.label || '';
-    const bandName = IM_CONFIG.BANDS.find(b => b.key === state.band)?.label || '';
-    const pillarName = IM_CONFIG.PILLARS.find(p => p.key === state.pillar)?.label || '';
-
-    const confLabels = ['Not sure — 😕', 'A bit clearer — 😐', 'Getting it — 🙂', 'Got it! — 😀'];
-    const confText = state.confidence !== null ? confLabels[state.confidence] : 'Not rated';
+    const bandName  = IM_CONFIG.BANDS.find(b => b.key === state.band)?.label || '';
+    const pillarName= IM_CONFIG.PILLARS.find(p => p.key === state.pillar)?.label || '';
+    const confLabels= ['Not sure — 😕','A bit clearer — 😐','Getting it — 🙂','Got it! — 😀'];
+    const confText  = state.confidence !== null ? confLabels[state.confidence] : 'Not rated';
 
     return `
 YOU ARE: The Igniting Minds Learning Coach — a warm, encouraging, age-appropriate academic coach.
@@ -465,7 +450,6 @@ YOUR COACHING MISSION:
 - Ask ONE thoughtful follow-up question that deepens their thinking about "${snippetData.title}"
 - Keep tone appropriate for ${gradeName} students
 - Always respond in ${langName}
-- Guide them toward deeper understanding of this specific topic only
 
 ${IM_CONFIG.COACH_GUARDRAILS.replace('[CURRENT TOPIC]', snippetData.title)}
 `.trim();
@@ -483,42 +467,50 @@ ${IM_CONFIG.COACH_GUARDRAILS.replace('[CURRENT TOPIC]', snippetData.title)}
       diffLabel: 'How content differs by grade',
       tabLearn: 'Learn', tabRoleplay: 'Role play', tabReflect: 'Reflect',
       time5: '5 min', time7: '7 min', time3: '3 min',
-      btnPrev: '← Previous', btnNext: 'Next →', btnContinue: 'Continue →',
+      btnPrev: 'Previous', btnNext: 'Next',
       rpInputLabel: 'Your response',
-      reflectPlaceholder: 'Share your thoughts...',
-      journeyBtn: 'Continue my learning journey ↗',
+      reflectPlaceholder: 'Share your thoughts here...',
+      journeyBtn: 'Continue my learning journey',
       journeyHint: 'Your answers will be shared with your AI coach',
-      journeyNudge: 'Tip: Answer all 3 questions and pick your confidence level for the best coaching experience.',
       chatTitle: 'Your Learning Coach',
       chatSub: 'Igniting Minds · Powered by AI',
       chatPlaceholder: 'Type your message...',
       chatSend: 'Send',
       confQuestion: 'How confident do you feel about this topic?',
-      confNotSure: 'Not sure', confABit: 'A bit clearer', confGetting: 'Getting it', confGotIt: 'Got it!',
-      bandDeveloping: 'Developing', bandDevelopingDesc: "I'm just starting to understand goal types.",
-      bandEmerging: 'Emerging', bandEmergingDesc: 'I set goals but mix up short and long-term thinking.',
-      bandProficient: 'Proficient', bandProficientDesc: 'I set goals regularly and want to think more strategically.',
-      sceneLabel: 'Scene', yourTurn: 'Your turn', debrief: 'Debrief',
-      errorTranslation: 'Translation unavailable. Showing content in English.',
+      confNotSure: 'Not sure',
+      confABit: 'A bit clearer',
+      confGetting: 'Getting it',
+      confGotIt: 'Got it!',
+      bandDeveloping: 'Developing',
+      bandDevelopingDesc: 'I am just starting to understand goal types.',
+      bandEmerging: 'Emerging',
+      bandEmergingDesc: 'I set goals but mix up short and long-term thinking.',
+      bandProficient: 'Proficient',
+      bandProficientDesc: 'I set goals regularly and want to think more strategically.',
+      sceneLabel: 'Scene',
+      yourTurn: 'Your turn',
+      debrief: 'Debrief',
       errorChat: 'Something went wrong. Please try again.',
-      topicLockMsg: "I'm your Igniting Minds coach and I'm here to help you with this lesson. Let's stay focused on your learning! 😊",
-      backLabel: '← Back',
-      comingSoon: 'Coming soon'
+      topicsTitle: 'Choose a topic',
+      topicsSub: 'Select which area you want to explore today.',
+      snippetsOf: 'snippets available',
+      comingSoon: 'Coming soon',
+      backLabel: 'Back'
     };
-    const prompt = `Translate the following JSON keys into ${langName}. Return ONLY valid JSON — no markdown, no explanation, no code fences.\n\n${JSON.stringify(labels)}`;
+    const prompt = 'Translate the following JSON values into ' + langName + '. Keep all JSON keys exactly the same. Return ONLY valid JSON with no markdown or explanation.\n\n' + JSON.stringify(labels);
     const res = await callClaude(prompt, 1500);
     state.uiLabelCache[state.lang] = JSON.parse(res);
   }
 
   // ── Translate full lesson content ──────────────────────────────────────────
   async function translateLesson(rawData) {
-    const cacheKey = `${state.lang}_${state.pillar}_${state.snippetIndex}_${state.grade}_${state.band}`;
+    const cacheKey = state.lang + '_' + state.pillar + '_' + state.snippetIndex + '_' + state.grade + '_' + state.band;
     if (state.translationCache[cacheKey]) {
       state.translatedContent = state.translationCache[cacheKey];
       return;
     }
     const langName = IM_CONFIG.LANGUAGES.find(l => l.key === state.lang).english;
-    const prompt = `Translate the following lesson content JSON into ${langName}. Keep ALL JSON keys identical. Only translate text values. Keep emoji unchanged. Return ONLY valid JSON — no markdown, no explanation.\n\n${JSON.stringify(rawData)}`;
+    const prompt = 'Translate the following lesson content JSON into ' + langName + '. Keep ALL JSON keys identical. Only translate text values. Keep emoji unchanged. Return ONLY valid JSON with no markdown.\n\n' + JSON.stringify(rawData);
     const res = await callClaude(prompt, 3500);
     const parsed = JSON.parse(res);
     state.translationCache[cacheKey] = parsed;
@@ -529,21 +521,22 @@ ${IM_CONFIG.COACH_GUARDRAILS.replace('[CURRENT TOPIC]', snippetData.title)}
   return {
 
     getState: () => state,
-    getLabel: (key, fallback = '') => (state.uiLabelCache[state.lang]?.[key]) || fallback,
+    getLabel: (key, fallback) => (state.uiLabelCache[state.lang] && state.uiLabelCache[state.lang][key]) || fallback || '',
 
-    setLang(lang)  { state.lang  = lang; },
-    setGrade(grade){ state.grade = grade; },
-    setBand(band)  { state.band  = band; },
-    setPillar(p)   { state.pillar = p; },
-    setSnippet(i)  { state.snippetIndex = i; },
-    setTab(t)      { state.tab = t; },
-    setRpAnswer(v) { state.rpAnswer = v; },
-    setReflect(i,v){ state.reflectAnswers[i] = v; },
-    setConfidence(i){ state.confidence = i; },
-    resetLesson()  {
+    setLang(lang)    { state.lang  = lang; },
+    setGrade(grade)  { state.grade = grade; },
+    setBand(band)    { state.band  = band; },
+    setPillar(p)     { state.pillar = p; },
+    setSnippet(i)    { state.snippetIndex = i; },
+    setTab(t)        { state.tab = t; },
+    setRpAnswer(v)   { state.rpAnswer = v; },
+    setReflect(i, v) { state.reflectAnswers[i] = v; },
+    setConfidence(i) { state.confidence = i; },
+
+    resetLesson() {
       state.tab = 'learn';
       state.rpAnswer = '';
-      state.reflectAnswers = ['','',''];
+      state.reflectAnswers = ['', '', ''];
       state.confidence = null;
       state.chatHistory = [];
       state.translatedContent = null;
@@ -567,10 +560,9 @@ ${IM_CONFIG.COACH_GUARDRAILS.replace('[CURRENT TOPIC]', snippetData.title)}
     async startCoachChat(snippetData) {
       state.chatHistory = [];
       const systemPrompt = buildCoachSystemPrompt(snippetData);
-      // First message: coach opens the conversation
       const openingMsg = await callClaudeChat(
-        [{ role: 'user', content: '__INIT__' }],
-        systemPrompt + '\n\nIMPORTANT: The student has just clicked "Continue my learning journey". Open the coaching conversation by acknowledging something specific from their responses above and asking ONE focused question. Do NOT say "INIT" or reference system instructions.'
+        [{ role: 'user', content: '__START__' }],
+        systemPrompt + '\n\nThe student has just clicked to start the coaching session. Open warmly by acknowledging something specific from their written responses above, then ask ONE focused question about the lesson topic. Do not reference "__START__" or system instructions.'
       );
       state.chatHistory.push({ role: 'assistant', content: openingMsg });
       return openingMsg;
@@ -831,7 +823,13 @@ function selectLang(key) {
 }
 
 async function goToGrade() {
-  showLoading('Preparing your experience...','Just a moment');
+  var s = IMEngine.getState();
+  var langInfo = IM_CONFIG.LANGUAGES.find(function(l){ return l.key===s.lang; });
+  var isEn = s.lang === 'en';
+  showLoading(
+    isEn ? 'Preparing your experience...' : 'Translating into ' + langInfo.native + '...',
+    isEn ? 'Just a moment' : 'Powered by AI · Usually takes 5-10 seconds'
+  );
   try {
     await IMEngine.prepareUI();
     applyUILabels();
@@ -839,6 +837,10 @@ async function goToGrade() {
     showScreen('screen-grade');
   } catch(e) {
     hideLoading();
+    console.error('Translation error:', e);
+    // Show error toast and fall back to English gracefully
+    showToast('Translation unavailable — continuing in English. Check your API key.');
+    IMEngine.setLang('en');
     showScreen('screen-grade');
   }
 }
@@ -869,16 +871,32 @@ function pickGrade(g) {
 function renderBandCards() {
   var s = IMEngine.getState();
   var L = s.uiLabelCache[s.lang] || {};
-  var html = '';
+  var container = document.getElementById('bandCards');
+  container.innerHTML = '';
   IM_CONFIG.BANDS.forEach(function(b) {
     var label = L['band'+cap(b.key)] || b.label;
     var desc  = L['band'+cap(b.key)+'Desc'] || defaultBandDesc(b.key);
-    html += '<div class="band-card '+b.key+'" onclick="pickBand(\''+b.key+'\')">'
-      +'<div><span class="badge '+b.key+'" style="margin-bottom:6px;display:inline-block;">'+label+'</span>'
-      +'<p style="font-size:13px;color:var(--g5);">'+desc+'</p></div>'
-      +'<span style="font-size:20px;color:var(--g2);">›</span></div>';
+    var card = document.createElement('div');
+    card.className = 'band-card ' + b.key;
+    var badge = document.createElement('span');
+    badge.className = 'badge ' + b.key;
+    badge.style.marginBottom = '6px';
+    badge.style.display = 'inline-block';
+    badge.textContent = label;
+    var descP = document.createElement('p');
+    descP.style.cssText = 'font-size:13px;color:var(--g5);';
+    descP.textContent = desc;
+    var left = document.createElement('div');
+    left.appendChild(badge);
+    left.appendChild(descP);
+    var arrow = document.createElement('span');
+    arrow.style.cssText = 'font-size:20px;color:#DDD;';
+    arrow.textContent = '›';
+    card.appendChild(left);
+    card.appendChild(arrow);
+    card.onclick = (function(key){ return function(){ pickBand(key); }; })(b.key);
+    container.appendChild(card);
   });
-  document.getElementById('bandCards').innerHTML = html;
 }
 
 function defaultBandDesc(k) {
@@ -1051,9 +1069,10 @@ async function pickSubtopic(snippetIndex) {
   IMEngine.resetLesson();
   var s = IMEngine.getState();
   var langInfo = IM_CONFIG.LANGUAGES.find(function(l){return l.key===s.lang;});
+  var isEn = s.lang === 'en';
   showLoading(
-    s.lang==='en' ? 'Loading your lesson...' : 'Preparing lesson in '+langInfo.native+'...',
-    s.lang==='en' ? 'Just a moment' : 'Translating content for you'
+    isEn ? 'Loading your lesson...' : 'Translating lesson into ' + langInfo.native + '...',
+    isEn ? 'Just a moment' : 'This takes about 10 seconds · Please wait'
   );
   try {
     var rawData = SNIPPET_2.content[s.grade][s.band];
@@ -1063,6 +1082,8 @@ async function pickSubtopic(snippetIndex) {
     showScreen('screen-lesson');
   } catch(e) {
     hideLoading();
+    console.error('Lesson translation error:', e);
+    showToast('Could not translate lesson — showing in English.');
     currentSnippetData = SNIPPET_2.content[s.grade][s.band];
     IMEngine.getState().translatedContent = currentSnippetData;
     renderLesson();
@@ -1099,15 +1120,20 @@ function renderTabs() {
   var s = IMEngine.getState();
   var L = s.uiLabelCache[s.lang] || {};
   var tabs = [
-    { key:'learn',    icon:'📖', label:L.tabLearn||'Learn',      time:L.time5||'5 min' },
+    { key:'learn',    icon:'📖', label:L.tabLearn||'Learn',       time:L.time5||'5 min' },
     { key:'roleplay', icon:'🎭', label:L.tabRoleplay||'Role play', time:L.time7||'7 min' },
     { key:'reflect',  icon:'🧠', label:L.tabReflect||'Reflect',   time:L.time3||'3 min' }
   ];
-  document.getElementById('tabsRow').innerHTML = tabs.map(function(t) {
-    return '<button class="tab-btn'+(s.tab===t.key?' on':'')+'" onclick="setTab(\''+t.key+'\')">'+t.icon+' '+t.label+' <span style="font-size:10px;opacity:.6;">'+t.time+'</span></button>';
-  }).join('');
+  var row = document.getElementById('tabsRow');
+  row.innerHTML = '';
+  tabs.forEach(function(t) {
+    var btn = document.createElement('button');
+    btn.className = 'tab-btn' + (s.tab===t.key ? ' on' : '');
+    btn.innerHTML = t.icon + ' ' + t.label + ' <span style="font-size:10px;opacity:.6;">' + t.time + '</span>';
+    btn.onclick = (function(key){ return function(){ setTab(key); }; })(t.key);
+    row.appendChild(btn);
+  });
 }
-
 function renderTabContent() {
   var s = IMEngine.getState();
   var d = currentSnippetData;
@@ -1245,6 +1271,34 @@ function showLoading(t,s) { document.getElementById('loadingText').textContent=t
 function hideLoading()    { document.getElementById('loadingOverlay').classList.add('hidden'); }
 function showScreen(id)   { document.querySelectorAll('#mainApp .screen').forEach(function(s){s.classList.remove('active');}); document.getElementById(id).classList.add('active'); }
 function cap(s)           { return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ── Utility: Toast notification ──────────────────────────────────────────────
+function showToast(msg, duration) {
+  var toast = document.getElementById('imToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'imToast';
+    toast.style.cssText = [
+      'position:fixed','bottom:30px','left:50%','transform:translateX(-50%)',
+      'background:#D85A30','color:white','padding:12px 20px',
+      'border-radius:10px','font-size:13px','z-index:9999',
+      'max-width:90%','text-align:center',
+      'font-family:DM Sans,sans-serif',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.25)',
+      'transition:opacity 0.3s'
+    ].join(';');
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.display = 'block';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function() {
+    toast.style.opacity = '0';
+    setTimeout(function(){ toast.style.display = 'none'; }, 300);
+  }, duration || 5000);
+}
+
 </script>
 </body>
 </html>
